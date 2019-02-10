@@ -18,11 +18,16 @@ extension MediaProcessor {
     func processVideoWithElements(item: MediaItem, completion: @escaping ProcessCompletionHandler) {
         let mixComposition = AVMutableComposition()
         let compositionVideoTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID: kCMPersistentTrackID_Invalid)
-        let clipVideoTrack = item.sourceAsset.tracks(withMediaType: AVMediaType.video).first
-        let clipAudioTrack = item.sourceAsset.tracks(withMediaType: AVMediaType.audio).first
         
+        guard let clipVideoTrack = item.sourceAsset.tracks(withMediaType: AVMediaType.video).first else {
+            completion(MediaProcessResult(processedUrl: nil, image: nil), nil)
+            return
+        }
+        
+        let clipAudioTrack = item.sourceAsset.tracks(withMediaType: AVMediaType.audio).first
+
         do {
-            try compositionVideoTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, item.sourceAsset.duration), of: clipVideoTrack!, at: kCMTimeZero)
+            try compositionVideoTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, item.sourceAsset.duration), of: clipVideoTrack, at: kCMTimeZero)
         } catch {
             completion(MediaProcessResult(processedUrl: nil, image: nil), error)
         }
